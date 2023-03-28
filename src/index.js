@@ -1,5 +1,8 @@
 import ImageSearch from './js/get_images';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import Throttle from 'lodash.throttle';
+
+let isLoading = false;
 
 const refs = {
   gallery: document.querySelector('.gallery'),
@@ -33,7 +36,7 @@ function renderGalleryImages(hits) {
     }
   );
 
-  refs.gallery.innerHTML = gallery.join('');
+  refs.gallery.insertAdjacentHTML('beforeend', gallery.join(''));
 }
 
 const newSearchImages = new ImageSearch(process.env.API_KEY);
@@ -42,12 +45,8 @@ document.addEventListener('submit', onSearch);
 
 async function onSearch(e) {
   e.preventDefault();
+
   newSearchImages.query = e.srcElement.searchQuery.value;
-
-  if (newSearchImages.query === '') {
-    return;
-  }
-
   newSearchImages.resetPage();
   clearGalleryContainer();
 
@@ -67,3 +66,32 @@ function formattedNumber(number) {
 function clearGalleryContainer() {
   refs.gallery.innerHTML = '';
 }
+
+function checkScrollPosition() {
+  const scrollBottom = window.innerHeight + window.scrollY;
+  console.log(scrollBottom);
+  if (scrollBottom >= document.documentElement.offsetHeight - 500) {
+    console.log('loadMoreData');
+    loadMoreData();
+  }
+}
+
+async function loadMoreData() {
+  console.log('isLoading', isLoading);
+  if (newSearchImages.isLoading) {
+    return;
+  }
+
+  try {
+    console.log('loadmore try');
+    newSearchImages.isLoading = true;
+    const gallery = await newSearchImages.searchImages();
+    console.log('gallery', gallery);
+    renderGalleryImages(gallery);
+    newSearchImages.isLoading = false;
+  } catch (error) {
+    Notify.failure(error.message);
+  }
+}
+
+window.addEventListener('scroll', Throttle(checkScrollPosition, 1000));

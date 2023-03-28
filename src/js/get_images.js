@@ -9,6 +9,8 @@ class ImageSearch {
     this.maxPage = 0;
     this.totalHits = 0;
     this.searchQuery = '';
+    this.prevSearchQuery = '';
+    this.isLoading = false;
   }
 
   async searchImages() {
@@ -23,6 +25,13 @@ class ImageSearch {
         page: this.page,
       },
     };
+
+    if (this.searchQuery === this.prevSearchQuery && !this.isLoading) {
+      return;
+    } else if (!this.isLoading) {
+      this.prevSearchQuery = this.searchQuery;
+      this.resetPage();
+    }
 
     try {
       const response = await axios.get(this.API_URL, options);
@@ -40,6 +49,7 @@ class ImageSearch {
       }
 
       this.incrementPage();
+      console.log(this.page, 'page');
       return hits;
     } catch (error) {
       console.log(error);
