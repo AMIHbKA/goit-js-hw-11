@@ -19,18 +19,22 @@ function renderGalleryImages(hits) {
         <img src="${webformatURL}" alt="${tags}" loading="lazy" />
       </a>
         <div class="info">
-            <p class="info-item">
-                <b>Likes: </b>${formattedNumber(likes)}
-            </p>
-            <p class="info-item">
-                <b>Views: </b>${formattedNumber(views)}
-            </p>
-            <p class="info-item">
-                <b>Comments: </b>${formattedNumber(comments)}
-            </p>
-            <p class="info-item">
-                <b>Downloads: </b>${formattedNumber(downloads)}
-            </p>
+          <div class= "info-item">
+            <p class="info-item__header">Likes:</p>
+            <p class="info-item__value">${formattedNumber(likes)}</p>
+          </div>
+            <div class= "info-item">
+              <p class="info-item__header">Views:</p>
+              <p class="info-item__value">${formattedNumber(views)}</p>
+            </div>
+            <div class= "info-item">
+              <p class="info-item__header">Comments:</p>
+              <p class="info-item__value">${formattedNumber(comments)}</p>
+            </div>
+            <div class= "info-item">
+              <p class="info-item__header">Downloads:</p>
+              <p class="info-item__value">${formattedNumber(downloads)}</p>
+            </div>
         </div>
     </div>
 `;
