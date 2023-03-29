@@ -7,6 +7,7 @@ let isLoading = false;
 const refs = {
   gallery: document.querySelector('.gallery'),
   form: document.querySelector('.search-form'),
+  loadingStatus: document.querySelector('.loader'),
 };
 
 function renderGalleryImages(hits) {
@@ -69,27 +70,26 @@ function clearGalleryContainer() {
 
 function checkScrollPosition() {
   const scrollBottom = window.innerHeight + window.scrollY;
-  console.log(scrollBottom);
   if (scrollBottom >= document.documentElement.offsetHeight - 500) {
-    console.log('loadMoreData');
     loadMoreData();
   }
 }
 
 async function loadMoreData() {
-  console.log('isLoading', isLoading);
   if (newSearchImages.isLoading) {
     return;
   }
 
   try {
-    console.log('loadmore try');
+    refs.loadingStatus.classList.add('hidden');
     newSearchImages.isLoading = true;
     const gallery = await newSearchImages.searchImages();
-    console.log('gallery', gallery);
+
     renderGalleryImages(gallery);
     newSearchImages.isLoading = false;
+    refs.loadingStatus.classList.remove('hidden');
   } catch (error) {
+    refs.loadingStatus.classList.remove('hidden');
     Notify.failure(error.message);
   }
 }
