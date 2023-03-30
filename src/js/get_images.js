@@ -1,10 +1,15 @@
 import axios from 'axios';
 
+const DEFAULT_PER_PAGE = 40;
+const DEFAULT_IMAGE_TYPE = 'photo';
+const DEFAULT_ORIENTATION = 'horizontal';
+const DEFAULT_SAFESEARCH = true;
+
 class ImageSearch {
   constructor(apiKey) {
     this.API_URL = 'https://pixabay.com/api/';
     this.API_KEY = apiKey;
-    this.perPage = 40;
+    this.perPage = DEFAULT_PER_PAGE;
     this.page = 1;
     this.maxPage = 0;
     this.totalHits = 0;
@@ -14,24 +19,30 @@ class ImageSearch {
   }
 
   async searchImages() {
+    if (!this.searchQuery || this.isLoading) {
+      return;
+    }
+
+    // if (this.searchQuery === this.prevSearchQuery && !this.isLoading) {
+    //   return;
+    // }
+
+    // if (!this.isLoading) {
+    //   this.prevSearchQuery = this.searchQuery;
+    //   this.resetPage();
+    // }
+
     const options = {
       params: {
         key: this.API_KEY,
         q: this.searchQuery,
-        image_type: 'photo',
-        orientation: 'horizontal',
-        safesearch: true,
+        image_type: DEFAULT_IMAGE_TYPE,
+        orientation: DEFAULT_ORIENTATION,
+        safesearch: DEFAULT_SAFESEARCH,
         per_page: this.perPage,
         page: this.page,
       },
     };
-
-    if (this.searchQuery === this.prevSearchQuery && !this.isLoading) {
-      return;
-    } else if (!this.isLoading) {
-      this.prevSearchQuery = this.searchQuery;
-      this.resetPage();
-    }
 
     try {
       const response = await axios.get(this.API_URL, options);
@@ -48,6 +59,7 @@ class ImageSearch {
 
       this.incrementPage();
       console.log(this.page, 'page');
+
       return hits;
     } catch (error) {
       console.log(error);
@@ -73,6 +85,28 @@ class ImageSearch {
 
   set query(newQuery) {
     this.searchQuery = newQuery;
+    //
+    // this.prevSearchQuery = this.searchQuery;
+    this.resetPage();
+  }
+
+  setPage(page) {
+    if (page >= 1 && page <= this.maxPage) {
+      this.page = page;
+    }
+  }
+
+  setPerPage(perPage) {
+    if (perPage >= 1 && perPage <= 200) {
+      this.perPage = perPage;
+    }
+  }
+
+  setOptions({ imageType, orientation, safesearch }) {
+    this.imageType = imageType || DEFAULT_IMAGE_TYPE;
+    this.orientation = orientation || DEFAULT_ORIENTATION;
+    this.safesearch =
+      safesearch !== undefined ? safesearch : DEFAULT_SAFESEARCH;
   }
 }
 
