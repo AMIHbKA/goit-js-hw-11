@@ -41,8 +41,6 @@ class ImageSearch {
       this.maxPage = Math.ceil(this.totalHits / this.perPage);
 
       if (this.maxPage === this.page) {
-        //   console.log('pages', this.maxPage, this.page, this.totalHits);
-        //   Если изображений нет, тогда срабатывает ошибка ниже, так как ТоталХится имеет всего 1 запись
         throw new Error(
           "We're sorry, but you've reached the end of search results."
         );
