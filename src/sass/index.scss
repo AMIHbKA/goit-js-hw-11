@@ -1,6 +1,8 @@
+@import './utils/variables';
+@import './base/base';
 @import './layout/header';
 @import './gallery';
 @import './form';
 @import './container';
 @import './loader';
-@import './base/base';
+@import './components/buttons';

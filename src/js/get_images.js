@@ -44,6 +44,12 @@ class ImageSearch {
       const response = await axios.get(this.API_URL, options);
       const { hits, totalHits } = response.data;
 
+      if (!totalHits) {
+        throw new Error(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+      }
+
       this.totalHits = totalHits;
       this.maxPage = Math.ceil(this.totalHits / this.perPage);
 
@@ -55,10 +61,8 @@ class ImageSearch {
 
       this.incrementPage();
       console.log(this.page, 'page');
-
       return hits;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -81,8 +85,6 @@ class ImageSearch {
 
   set query(newQuery) {
     this.searchQuery = newQuery;
-    //
-    // this.prevSearchQuery = this.searchQuery;
     this.resetPage();
   }
 

@@ -4,11 +4,10 @@ import Throttle from 'lodash.throttle';
 import SimpleLightbox from 'simplelightbox';
 
 const newSearchImages = new ImageSearch(process.env.API_KEY);
-
-document.addEventListener('submit', onSearch);
+const scrollToTopButton = document.getElementById('scrollToTopButton');
+document.addEventListener('submit', handleSearch);
 
 const throttleCheckScrollPosition = Throttle(checkScrollPosition, 1000);
-document.addEventListener('scroll', throttleCheckScrollPosition);
 
 let Lightbox = new SimpleLightbox('.gallery a', {
   captionSelector: 'img',
@@ -67,34 +66,30 @@ function renderGalleryImages(hits) {
   Lightbox.refresh();
 }
 
-async function onSearch(e) {
+async function handleSearch(e) {
   e.preventDefault();
-
   const searchQuery = e.target.searchQuery.value.trim();
-
-  if (!searchQuery) {
-    return;
-  }
-
-  if (newSearchImages.prevSearchQuery === searchQuery) {
-    return;
-  }
-
-  newSearchImages.query = searchQuery;
-  newSearchImages.resetPage();
-  clearGalleryContainer();
-
   try {
+    if (!searchQuery) {
+      Notify.warning('Note that the query must not be empty!');
+      return;
+    }
+
+    if (newSearchImages.prevSearchQuery === searchQuery) {
+      return;
+    }
+
+    newSearchImages.query = searchQuery;
+    newSearchImages.resetPage();
+    clearGalleryContainer();
+    document.removeEventListener('scroll', throttleCheckScrollPosition);
+    document.addEventListener('scroll', throttleCheckScrollPosition);
     const gallery = await newSearchImages.searchImages();
-
     renderGalleryImages(gallery);
-
-    // if (!document.hasEventListener('scroll')) {
-    //   document.addEventListener('scroll', throttleCheckScrollPosition);
-    //   console.log('addEventListener scroll');
-    // }
+    Notify.success(`Hooray! We found ${newSearchImages.totalHits} images.`);
   } catch (error) {
     Notify.failure(error.message);
+    clearGalleryContainer();
   }
 }
 
@@ -109,6 +104,7 @@ function clearGalleryContainer() {
 
 function checkScrollPosition() {
   const scrollBottom = window.innerHeight + window.scrollY;
+  console.log(scrollBottom);
   if (scrollBottom >= document.documentElement.offsetHeight - 500) {
     loadMoreData();
     setTimeout(() => {
@@ -116,12 +112,19 @@ function checkScrollPosition() {
       console.log('smoothScroll');
     }, 500);
   }
+
+  if (window.pageYOffset > 100) {
+    scrollToTopButton.style.display = 'block';
+  } else {
+    scrollToTopButton.style.display = 'none';
+  }
 }
 
 async function loadMoreData() {
   if (newSearchImages.page === newSearchImages.maxPage) {
     refs.loadingStatus.classList.add('hidden');
     document.removeEventListener('scroll', throttleCheckScrollPosition);
+    Notify.info("We're sorry, but you've reached the end of search results.");
     console.log('removeEventListener - scroll');
     return;
   }
@@ -150,3 +153,10 @@ function smoothScroll() {
     behavior: 'smooth',
   });
 }
+
+scrollToTopButton.addEventListener('click', () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  });
+});
