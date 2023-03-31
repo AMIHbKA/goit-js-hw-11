@@ -19,18 +19,14 @@ class ImageSearch {
   }
 
   async searchImages() {
-    if (!this.searchQuery || this.isLoading) {
+    if (this.searchQuery === this.prevSearchQuery && !this.isLoading) {
       return;
     }
 
-    // if (this.searchQuery === this.prevSearchQuery && !this.isLoading) {
-    //   return;
-    // }
-
-    // if (!this.isLoading) {
-    //   this.prevSearchQuery = this.searchQuery;
-    //   this.resetPage();
-    // }
+    if (!this.isLoading) {
+      this.prevSearchQuery = this.searchQuery;
+      this.resetPage();
+    }
 
     const options = {
       params: {

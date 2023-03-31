@@ -8,8 +8,7 @@ const newSearchImages = new ImageSearch(process.env.API_KEY);
 document.addEventListener('submit', onSearch);
 
 const throttleCheckScrollPosition = Throttle(checkScrollPosition, 1000);
-
-window.addEventListener('scroll', throttleCheckScrollPosition);
+document.addEventListener('scroll', throttleCheckScrollPosition);
 
 let Lightbox = new SimpleLightbox('.gallery a', {
   captionSelector: 'img',
@@ -71,10 +70,17 @@ function renderGalleryImages(hits) {
 async function onSearch(e) {
   e.preventDefault();
 
-  newSearchImages.query = e.srcElement.searchQuery.value;
-  if (newSearchImages.prevSearchQuery === newSearchImages.query) {
+  const searchQuery = e.target.searchQuery.value.trim();
+
+  if (!searchQuery) {
     return;
   }
+
+  if (newSearchImages.prevSearchQuery === searchQuery) {
+    return;
+  }
+
+  newSearchImages.query = searchQuery;
   newSearchImages.resetPage();
   clearGalleryContainer();
 
@@ -82,6 +88,11 @@ async function onSearch(e) {
     const gallery = await newSearchImages.searchImages();
 
     renderGalleryImages(gallery);
+
+    // if (!document.hasEventListener('scroll')) {
+    //   document.addEventListener('scroll', throttleCheckScrollPosition);
+    //   console.log('addEventListener scroll');
+    // }
   } catch (error) {
     Notify.failure(error.message);
   }
@@ -110,7 +121,7 @@ function checkScrollPosition() {
 async function loadMoreData() {
   if (newSearchImages.page === newSearchImages.maxPage) {
     refs.loadingStatus.classList.add('hidden');
-    window.removeEventListener('scroll', throttleCheckScrollPosition);
+    document.removeEventListener('scroll', throttleCheckScrollPosition);
     console.log('removeEventListener - scroll');
     return;
   }
