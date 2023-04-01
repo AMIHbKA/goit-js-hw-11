@@ -1,10 +1,10 @@
 @import './utils/variables';
 @import './base/base';
 @import './layout/header';
-@import './gallery';
-@import './form';
-@import './container';
-@import './loader';
+@import './components/gallery';
+@import './components/form';
+@import './layout/container';
+@import './components/loader';
 @import './components/buttons';
 @import '../../node_modules/simplelightbox/dist/simple-lightbox.min.css';
 @import '../../node_modules/modern-normalize/modern-normalize.css';

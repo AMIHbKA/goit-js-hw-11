@@ -1,5 +1,8 @@
 .header {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid #ddd;
-  background-color: #3f57b3;
+  border-bottom: 1px solid $secondColor;
+  background-color: $mainColor;
 }

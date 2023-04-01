@@ -89,7 +89,7 @@
   width: 100%;
   height: 56%;
   border-radius: 70px;
-  background-color: blue;
+  background-color: $mainColor;
 }
 .default-03 .ball::after {
   position: absolute;
@@ -99,7 +99,7 @@
   width: 100%;
   height: 56%;
   border-radius: 70px;
-  background-color: #ffc7bd;
+  background-color: #ddd;
   animation: default3 2.5s infinite linear;
   opacity: 0;
 }

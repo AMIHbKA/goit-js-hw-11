@@ -3,14 +3,15 @@
   flex-wrap: wrap;
   padding: 20px;
   gap: 20px;
-  justify-content: center;
-  max-width: 2500px;
+  // justify-content: center;
+  // max-width: 2500px;
 }
 
 .photo-card {
-  transition: transform 250ms ease-in;
+  transition: transform 250ms $transitionTime;
 
-  &:hover {
+  &:hover,
+  &:focus {
     transform: scale(1.03);
   }
 }
@@ -47,4 +48,9 @@
 .info-item__header,
 .info-item__value {
   margin: 0;
+}
+
+.sl-wrapper .sl-image .sl-caption {
+  background: $mainColor;
+  color: $secondColor;
 }

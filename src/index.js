@@ -7,7 +7,7 @@ const newSearchImages = new ImageSearch(process.env.API_KEY);
 const scrollToTopButton = document.getElementById('scrollToTopButton');
 document.addEventListener('submit', handleSearch);
 
-const throttleCheckScrollPosition = Throttle(checkScrollPosition, 1000);
+const throttleCheckScrollPosition = Throttle(checkScrollPosition, 500);
 
 let Lightbox = new SimpleLightbox('.gallery a', {
   captionSelector: 'img',
@@ -23,6 +23,15 @@ const refs = {
   form: document.querySelector('.search-form'),
   loadingStatus: document.querySelector('.loader'),
 };
+
+//кнопка вверх
+scrollToTopButton.addEventListener('click', () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  });
+  scrollToTopButton.style.display = 'none';
+});
 
 const template = ({
   webformatURL,
@@ -62,8 +71,14 @@ function renderGalleryImages(hits) {
   const gallery = hits.reduce((acc, hit) => acc + template(hit), '');
   refs.gallery.insertAdjacentHTML('beforeend', gallery);
   // Получаем высоту карточки изображения
-  cardHeight = refs.gallery.firstElementChild.getBoundingClientRect().height;
+  if (!cardHeight) {
+    console.log('Получаем высоту карточки изображения');
+    cardHeight = refs.gallery.firstElementChild.getBoundingClientRect().height;
+  }
   Lightbox.refresh();
+  if (hits.length < newSearchImages.perPage) {
+    refs.loadingStatus.classList.add('hidden');
+  }
 }
 
 async function handleSearch(e) {
@@ -121,19 +136,18 @@ function checkScrollPosition() {
 }
 
 async function loadMoreData() {
-  if (newSearchImages.page === newSearchImages.maxPage) {
-    refs.loadingStatus.classList.add('hidden');
-    document.removeEventListener('scroll', throttleCheckScrollPosition);
-    Notify.info("We're sorry, but you've reached the end of search results.");
-    console.log('removeEventListener - scroll');
-    return;
-  }
-  if (newSearchImages.isLoading) {
-    console.log('newSearchImages.isLoading - return');
-    return;
-  }
-
   try {
+    if (newSearchImages.page === newSearchImages.maxPage) {
+      refs.loadingStatus.classList.add('hidden');
+      document.removeEventListener('scroll', throttleCheckScrollPosition);
+      Notify.info("We're sorry, but you've reached the end of search results.");
+      console.log('removeEventListener - scroll');
+      return;
+    }
+    if (newSearchImages.isLoading) {
+      console.log('newSearchImages.isLoading - return');
+      return;
+    }
     newSearchImages.isLoading = true;
     const gallery = await newSearchImages.searchImages();
 
@@ -141,7 +155,6 @@ async function loadMoreData() {
     newSearchImages.isLoading = false;
     refs.loadingStatus.classList.remove('hidden');
   } catch (error) {
-    refs.loadingStatus.classList.remove('hidden');
     Notify.failure(error.message);
   }
 }
@@ -153,10 +166,3 @@ function smoothScroll() {
     behavior: 'smooth',
   });
 }
-
-scrollToTopButton.addEventListener('click', () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth',
-  });
-});
