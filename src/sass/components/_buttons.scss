@@ -7,15 +7,16 @@
   font-size: 18px;
   border: none;
   outline: none;
-  background-color: #555;
+  background-color: #3f57b3;
   color: white;
   cursor: pointer;
   padding: 15px;
   border-radius: 50%;
+  opacity: 0.6;
   transition: opacity 0.2s ease-in-out;
-
+  overflow: hidden;
   &:hover {
-    opacity: 0.8;
+    opacity: 1;
   }
 }
 
@@ -38,15 +39,19 @@
   vertical-align: baseline;
   color: #333;
   cursor: pointer;
+  transition: background-color 500ms ease-in-out;
 
-  .svg {
-    stroke: #000;
-    fill: red;
+  svg {
+    transition: stroke 500ms ease-in-out;
   }
 
-  &:hover {
-    stroke: #ffffff;
-    outline: 1px red solid;
+  &:hover,
+  &:focus {
     background-color: #fff;
+  }
+
+  &:hover svg,
+  &:focus svg {
+    stroke: #3f57b3;
   }
 }

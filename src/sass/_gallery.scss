@@ -1,9 +1,10 @@
 .gallery {
   display: flex;
   flex-wrap: wrap;
-  padding-block: 20px;
+  padding: 20px;
   gap: 20px;
   justify-content: center;
+  max-width: 2500px;
 }
 
 .photo-card {
@@ -37,10 +38,10 @@
   display: block;
   margin-inline: auto;
   text-align: center;
-}
 
-.info-item__header {
-  font-weight: 700;
+  &__header {
+    font-weight: 700;
+  }
 }
 
 .info-item__header,

@@ -68,7 +68,7 @@ class ImageSearch {
   }
 
   incrementPage() {
-    if (this.page >= this.maxPage) {
+    if (this.page > this.maxPage) {
       this.page = this.maxPage;
     } else {
       this.page += 1;
