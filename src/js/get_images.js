@@ -27,7 +27,7 @@ class ImageSearch {
       this.prevSearchQuery = this.searchQuery;
       this.resetPage();
     }
-    console.log(this.page, 'page');
+
     try {
       this.incrementPage();
       const options = {
@@ -42,10 +42,8 @@ class ImageSearch {
         },
       };
 
-      console.log(options);
       const response = await axios.get(this.API_URL, options);
       const { hits, totalHits } = response.data;
-      console.log(response.data);
 
       if (!totalHits) {
         throw new Error(

@@ -1,56 +1,103 @@
 .gallery {
-  display: flex;
-  flex-wrap: wrap;
-  padding: 20px;
-  gap: 20px;
-  // justify-content: center;
-  // max-width: 2500px;
-}
+  @include respond-to('tablet') {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
 
-.photo-card {
-  transition: transform 250ms $transitionTime;
+  @include respond-to('desktop') {
+    gap: 10px;
+    font-size: 1em;
+    display: flex;
+    flex-wrap: wrap;
+  }
 
-  &:hover,
-  &:focus {
-    transform: scale(1.03);
+  .photo-card {
+    transition: transform 250ms $transitionTime;
+
+    &:hover,
+    &:focus {
+      transform: scale(1.03);
+    }
   }
 }
 
 .image__photo-card {
   display: block;
+  margin-top: 5px;
+  object-fit: cover;
   width: 300px;
   height: calc(300px / 1.57px);
-  object-fit: cover;
+  margin-inline: auto;
+  border-top-right-radius: $borderRadius;
+  border-top-left-radius: $borderRadius;
+
+  @include respond-to('phone') {
+    width: $phoneCardWidth;
+    height: calc($phoneCardWidth / 1.57px);
+  }
+  @include respond-to('tablet') {
+    width: $tabletCardWidth;
+    height: calc($tabletCardWidth / 1.57px);
+  }
+
+  @include respond-to('desktop') {
+    width: $desktopCardWidth;
+    height: calc($desktopCardWidth / 1.57px);
+  }
 }
 
 .info {
   display: flex;
-  padding: 10px;
-  gap: 10px;
-  font-size: 0.8em;
-  line-height: 1.2em;
-
+  width: 300px;
+  margin-inline: auto;
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 1px rgba(0, 0, 0, 0.14),
     0px 2px 1px rgba(0, 0, 0, 0.2);
-  border-radius: 0px 0px 4px 4px;
+  border-radius: 0px 0px $borderRadius $borderRadius;
+
+  @include respond-to('phone') {
+    width: $phoneCardWidth;
+  }
+
+  @include respond-to('tablet') {
+    width: $tabletCardWidth;
+    padding: 10px;
+  }
+
+  @include respond-to('desktop') {
+    width: $desktopCardWidth;
+  }
 }
 
 .info-item {
   display: block;
   margin-inline: auto;
   text-align: center;
+  font-size: 0.7em;
+
+  @include respond-to('phone') {
+    width: $phoneCardWidth;
+  }
 
   &__header {
     font-weight: 700;
   }
-}
 
-.info-item__header,
-.info-item__value {
-  margin: 0;
+  &__header,
+  &__value {
+    margin-block: 5px;
+
+    @include respond-to('phone') {
+      margin-block: 10px;
+    }
+  }
 }
 
 .sl-wrapper .sl-image .sl-caption {
   background: $mainColor;
   color: $secondColor;
+}
+
+.gallery-section {
+  margin-bottom: 2em;
 }

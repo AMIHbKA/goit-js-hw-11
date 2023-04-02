@@ -3,11 +3,13 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import Throttle from 'lodash.throttle';
 import SimpleLightbox from 'simplelightbox';
 
-const newSearchImages = new ImageSearch(process.env.API_KEY);
+// const newSearchImages = new ImageSearch(process.env.API_KEY);
+const newSearchImages = new ImageSearch('33585066-cae5e25e756cb0d7a12760c5d');
 const scrollToTopButton = document.getElementById('scrollToTopButton');
-document.addEventListener('submit', handleSearch);
+const throttleCheckScrollPosition = Throttle(checkScrollPosition, 1000);
 
-const throttleCheckScrollPosition = Throttle(checkScrollPosition, 500);
+document.addEventListener('submit', handleSearch);
+document.addEventListener('scroll', throttleCheckScrollPosition);
 
 let Lightbox = new SimpleLightbox('.gallery a', {
   captionSelector: 'img',
@@ -24,14 +26,87 @@ const refs = {
   loadingStatus: document.querySelector('.loader'),
 };
 
-//кнопка вверх
-scrollToTopButton.addEventListener('click', () => {
-  window.scrollTo({
-    top: 0,
+async function handleSearch(e) {
+  e.preventDefault();
+  const searchQuery = e.target.searchQuery.value.trim();
+  try {
+    if (!searchQuery) {
+      Notify.warning('Note that the query must not be empty!');
+      return;
+    }
+
+    if (newSearchImages.prevSearchQuery === searchQuery) {
+      return;
+    }
+
+    newSearchImages.query = searchQuery;
+    newSearchImages.resetPage();
+    clearGalleryContainer();
+    document.removeEventListener('scroll', throttleCheckScrollPosition);
+    document.addEventListener('scroll', throttleCheckScrollPosition);
+    const gallery = await newSearchImages.searchImages();
+    renderGalleryImages(gallery);
+    Notify.success(`Hooray! We found ${newSearchImages.totalHits} images.`);
+  } catch (error) {
+    Notify.failure(error.message);
+    clearGalleryContainer();
+  }
+}
+
+function formattedNumber(number) {
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+function clearGalleryContainer() {
+  refs.gallery.innerHTML = '';
+  Lightbox.refresh();
+}
+
+function checkScrollPosition() {
+  const scrollBottom = window.innerHeight + window.scrollY;
+  if (scrollBottom >= document.documentElement.offsetHeight - 200) {
+    loadMoreData();
+  }
+
+  if (window.pageYOffset > 100) {
+    scrollToTopButton.style.display = 'block';
+  } else {
+    scrollToTopButton.style.display = 'none';
+  }
+}
+
+async function loadMoreData() {
+  try {
+    if (newSearchImages.page === newSearchImages.maxPage) {
+      refs.loadingStatus.classList.add('hidden');
+      document.removeEventListener('scroll', throttleCheckScrollPosition);
+      Notify.info("We're sorry, but you've reached the end of search results.");
+      return;
+    }
+    if (newSearchImages.isLoading) {
+      return;
+    }
+    newSearchImages.isLoading = true;
+    const gallery = await newSearchImages.searchImages();
+
+    renderGalleryImages(gallery);
+    newSearchImages.isLoading = false;
+    refs.loadingStatus.classList.remove('hidden');
+    setTimeout(() => {
+      smoothScroll();
+    }, 500);
+  } catch (error) {
+    Notify.failure(error.message);
+  }
+}
+
+// Функция для плавной прокрутки страницы
+function smoothScroll() {
+  window.scrollBy({
+    top: cardHeight * 2,
     behavior: 'smooth',
   });
-  scrollToTopButton.style.display = 'none';
-});
+}
 
 const template = ({
   webformatURL,
@@ -72,7 +147,6 @@ function renderGalleryImages(hits) {
   refs.gallery.insertAdjacentHTML('beforeend', gallery);
   // Получаем высоту карточки изображения
   if (!cardHeight) {
-    console.log('Получаем высоту карточки изображения');
     cardHeight = refs.gallery.firstElementChild.getBoundingClientRect().height;
   }
   Lightbox.refresh();
@@ -81,88 +155,11 @@ function renderGalleryImages(hits) {
   }
 }
 
-async function handleSearch(e) {
-  e.preventDefault();
-  const searchQuery = e.target.searchQuery.value.trim();
-  try {
-    if (!searchQuery) {
-      Notify.warning('Note that the query must not be empty!');
-      return;
-    }
-
-    if (newSearchImages.prevSearchQuery === searchQuery) {
-      return;
-    }
-
-    newSearchImages.query = searchQuery;
-    newSearchImages.resetPage();
-    clearGalleryContainer();
-    document.removeEventListener('scroll', throttleCheckScrollPosition);
-    document.addEventListener('scroll', throttleCheckScrollPosition);
-    const gallery = await newSearchImages.searchImages();
-    renderGalleryImages(gallery);
-    Notify.success(`Hooray! We found ${newSearchImages.totalHits} images.`);
-  } catch (error) {
-    Notify.failure(error.message);
-    clearGalleryContainer();
-  }
-}
-
-function formattedNumber(number) {
-  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-}
-
-function clearGalleryContainer() {
-  refs.gallery.innerHTML = '';
-  Lightbox.refresh();
-}
-
-function checkScrollPosition() {
-  const scrollBottom = window.innerHeight + window.scrollY;
-  console.log(scrollBottom);
-  if (scrollBottom >= document.documentElement.offsetHeight - 500) {
-    loadMoreData();
-    setTimeout(() => {
-      smoothScroll();
-      console.log('smoothScroll');
-    }, 500);
-  }
-
-  if (window.pageYOffset > 100) {
-    scrollToTopButton.style.display = 'block';
-  } else {
-    scrollToTopButton.style.display = 'none';
-  }
-}
-
-async function loadMoreData() {
-  try {
-    if (newSearchImages.page === newSearchImages.maxPage) {
-      refs.loadingStatus.classList.add('hidden');
-      document.removeEventListener('scroll', throttleCheckScrollPosition);
-      Notify.info("We're sorry, but you've reached the end of search results.");
-      console.log('removeEventListener - scroll');
-      return;
-    }
-    if (newSearchImages.isLoading) {
-      console.log('newSearchImages.isLoading - return');
-      return;
-    }
-    newSearchImages.isLoading = true;
-    const gallery = await newSearchImages.searchImages();
-
-    renderGalleryImages(gallery);
-    newSearchImages.isLoading = false;
-    refs.loadingStatus.classList.remove('hidden');
-  } catch (error) {
-    Notify.failure(error.message);
-  }
-}
-
-// Функция для плавной прокрутки страницы
-function smoothScroll() {
-  window.scrollBy({
-    top: cardHeight * 2,
+//кнопка вверх
+scrollToTopButton.addEventListener('click', () => {
+  window.scrollTo({
+    top: 0,
     behavior: 'smooth',
   });
-}
+  scrollToTopButton.style.display = 'none';
+});
