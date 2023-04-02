@@ -1,11 +1,16 @@
 import axios from 'axios';
 
+const DEFAULT_PER_PAGE = 40;
+const DEFAULT_IMAGE_TYPE = 'photo';
+const DEFAULT_ORIENTATION = 'horizontal';
+const DEFAULT_SAFESEARCH = true;
+
 class ImageSearch {
   constructor(apiKey) {
     this.API_URL = 'https://pixabay.com/api/';
     this.API_KEY = apiKey;
-    this.perPage = 40;
-    this.page = 1;
+    this.perPage = DEFAULT_PER_PAGE;
+    this.page = 0;
     this.maxPage = 0;
     this.totalHits = 0;
     this.searchQuery = '';
@@ -14,57 +19,61 @@ class ImageSearch {
   }
 
   async searchImages() {
-    const options = {
-      params: {
-        key: this.API_KEY,
-        q: this.searchQuery,
-        image_type: 'photo',
-        orientation: 'horizontal',
-        safesearch: true,
-        per_page: this.perPage,
-        page: this.page,
-      },
-    };
-
     if (this.searchQuery === this.prevSearchQuery && !this.isLoading) {
       return;
-    } else if (!this.isLoading) {
+    }
+
+    if (!this.isLoading) {
       this.prevSearchQuery = this.searchQuery;
       this.resetPage();
     }
 
     try {
+      this.incrementPage();
+      const options = {
+        params: {
+          key: this.API_KEY,
+          q: this.searchQuery,
+          image_type: DEFAULT_IMAGE_TYPE,
+          orientation: DEFAULT_ORIENTATION,
+          safesearch: DEFAULT_SAFESEARCH,
+          per_page: this.perPage,
+          page: this.page,
+        },
+      };
+
       const response = await axios.get(this.API_URL, options);
       const { hits, totalHits } = response.data;
 
-      this.totalHits = totalHits;
-      this.maxPage = Math.ceil(this.totalHits / this.perPage);
-
-      if (this.maxPage === this.page) {
+      if (!totalHits) {
         throw new Error(
-          "We're sorry, but you've reached the end of search results."
+          'Sorry, there are no images matching your search query. Please try again.'
         );
       }
 
-      this.incrementPage();
-      console.log(this.page, 'page');
+      this.totalHits = totalHits;
+      if (!this.maxPage) {
+        this.maxPage = Math.ceil(this.totalHits / this.perPage);
+      }
+
       return hits;
     } catch (error) {
-      console.log(error);
+      this.decrementPage();
       throw error;
     }
   }
 
   incrementPage() {
-    if (this.page >= this.maxPage) {
-      this.page = this.maxPage;
-    } else {
-      this.page += 1;
-    }
+    this.page += 1;
+  }
+
+  decrementPage() {
+    this.page -= 1;
   }
 
   resetPage() {
-    this.page = 1;
+    this.page = 0;
+    this.maxPage = 0;
   }
 
   get query() {
@@ -73,6 +82,26 @@ class ImageSearch {
 
   set query(newQuery) {
     this.searchQuery = newQuery;
+    this.resetPage();
+  }
+
+  setPage(page) {
+    if (page >= 1 && page <= this.maxPage) {
+      this.page = page;
+    }
+  }
+
+  setPerPage(perPage) {
+    if (perPage >= 1 && perPage <= 200) {
+      this.perPage = perPage;
+    }
+  }
+
+  setOptions({ imageType, orientation, safesearch }) {
+    this.imageType = imageType || DEFAULT_IMAGE_TYPE;
+    this.orientation = orientation || DEFAULT_ORIENTATION;
+    this.safesearch =
+      safesearch !== undefined ? safesearch : DEFAULT_SAFESEARCH;
   }
 }
 

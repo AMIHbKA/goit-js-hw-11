@@ -1,0 +1,13 @@
+.container {
+  @include respond-to('tablet') {
+    max-width: $tablet;
+    padding: 10px;
+    margin-inline: auto;
+  }
+
+  @include respond-to('desktop') {
+    max-width: $desktop;
+    padding: 10px;
+    margin-inline: auto;
+  }
+}
